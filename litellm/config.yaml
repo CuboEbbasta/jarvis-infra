@@ -13,6 +13,11 @@ model_list:
       model: ollama_chat/qwen3:14b
       api_base: http://host.docker.internal:11434
 
+  - model_name: local-vision        # immagini, appunti scritti a mano, schemi
+    litellm_params:
+      model: ollama_chat/qwen3-vl:8b
+      api_base: http://host.docker.internal:11434
+
   # --- Cloud (attivare quando c'è la chiave e il budget) ---
   # - model_name: cloud-smart
   #   litellm_params:
