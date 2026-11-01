@@ -1,0 +1,28 @@
+# Jarvis Model Gateway - LiteLLM
+# Gli agenti chiamano i NOMI LOGICI (model_name), mai il provider direttamente.
+
+model_list:
+  # --- Locali (Ollama sul PC) ---
+  - model_name: local-fast          # classificazione, riassunti, dati privati
+    litellm_params:
+      model: ollama_chat/qwen3:14b
+      api_base: http://host.docker.internal:11434
+
+  - model_name: local-private       # alias: tutto ciò che NON deve uscire dal PC
+    litellm_params:
+      model: ollama_chat/qwen3:14b
+      api_base: http://host.docker.internal:11434
+
+  # --- Cloud (attivare quando c'è la chiave e il budget) ---
+  # - model_name: cloud-smart
+  #   litellm_params:
+  #     model: anthropic/claude-sonnet-5
+  #     api_key: os.environ/ANTHROPIC_API_KEY
+
+litellm_settings:
+  drop_params: true
+  # fallbacks: [{"cloud-smart": ["local-fast"]}]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL

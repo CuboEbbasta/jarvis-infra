@@ -1,0 +1,37 @@
+name: jarvis
+
+services:
+  litellm-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: litellm
+      POSTGRES_DB: litellm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - litellm-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      interval: 5s
+      retries: 10
+
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    restart: unless-stopped
+    depends_on:
+      litellm-db:
+        condition: service_healthy
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
+    environment:
+      DATABASE_URL: postgresql://litellm:${POSTGRES_PASSWORD}@litellm-db:5432/litellm
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      - ./litellm/config.yaml:/app/config.yaml:ro
+    ports:
+      - "127.0.0.1:4000:4000"   # solo da questo PC, non dalla rete
+
+volumes:
+  litellm-db:
