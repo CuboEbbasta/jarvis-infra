@@ -10,7 +10,8 @@ $r = Invoke-RestMethod -Uri 'http://localhost:4000/key/generate' -Method Post -H
 
 $var = ($Agent.ToUpper() -replace '[^A-Z0-9]','_') + '_KEY'
 $envFile = if ($EnvFile) { $EnvFile } else { Join-Path (Split-Path $PSScriptRoot -Parent) 'agents\.env' }
-$lines = @(); if (Test-Path $envFile) { $lines = Get-Content $envFile | Where-Object { $_ -notmatch "^$var=" } }
+# @(...) obbligatorio: con una sola riga Get-Content restituisce una stringa e += la concatenerebbe sulla stessa riga
+$lines = @(); if (Test-Path $envFile) { $lines = @(Get-Content $envFile | Where-Object { $_ -notmatch "^$var=" }) }
 $lines += "$var=$($r.key)"
 Set-Content -Path $envFile -Value $lines -Encoding ascii
 Write-Host "Chiave per '$Agent' creata (modelli: $($Models -join ', '); budget: $BudgetUsd USD / 30 giorni)."
