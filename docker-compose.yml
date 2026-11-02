@@ -33,5 +33,19 @@ services:
     ports:
       - "127.0.0.1:4000:4000"   # solo da questo PC, non dalla rete
 
+  hermes:
+    image: nousresearch/hermes-agent:stable
+    restart: unless-stopped
+    command: ["gateway", "run"]
+    depends_on: [litellm]
+    environment:
+      TZ: Europe/Rome
+    volumes:
+      - ../hermes-data:/opt/data              # config, memoria, skill, sessioni di Hermes
+      - ../DBVault:/vault:ro                  # vault in SOLA LETTURA
+      - ../DBVault/Machine:/vault/Machine     # unica area scrivibile
+    profiles: ["hermes"]                      # si avvia solo con --profile hermes
+    # nessuna porta esposta: si usa da Telegram
+
 volumes:
   litellm-db:

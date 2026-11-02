@@ -13,9 +13,15 @@ model_list:
       model: ollama_chat/qwen3:14b
       api_base: http://host.docker.internal:11434
 
+  - model_name: local-agent         # orchestratore (Hermes): contesto 32K per tool calling
+    litellm_params:
+      model: ollama_chat/qwen3:14b
+      api_base: http://host.docker.internal:11434
+      num_ctx: 32768
+
   - model_name: local-vision        # immagini, appunti scritti a mano, schemi
     litellm_params:
-      model: ollama_chat/qwen3-vl:8b
+      model: ollama_chat/qwen3-vl:8b-instruct   # versione senza ragionamento: risponde direttamente
       api_base: http://host.docker.internal:11434
 
   # --- Cloud (attivare quando c'è la chiave e il budget) ---
