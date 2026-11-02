@@ -8,6 +8,7 @@
 # Rimuovere: Unregister-ScheduledTask -TaskName "Jarvis Richieste" -Confirm:$false
 param([switch]$Schedule, [switch]$Ciclo)
 $ErrorActionPreference = 'Continue'
+try { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $OutputEncoding = [Text.Encoding]::UTF8 } catch {}   # emoji leggibili negli esiti
 if ($Schedule) {
     $act = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Ciclo"
     $trg = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME

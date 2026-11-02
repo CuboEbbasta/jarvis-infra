@@ -1,6 +1,7 @@
 ﻿# Jarvis - avvisi del mattino su Telegram, preparati SOLO sul PC (decisione dell'utente, 03/11/2026).
 #   -Agenda    impegni di oggi da Machine\Contesto\Calendario.md (scritto dal Posta Agent). NON passa da Claude.
 #   -Rassegna  3 notizie "In evidenza" + allerte gravi (🟠/🔴 Protezione Civile, terremoti rilevanti) della rassegna di oggi.
+#              Se c'è un'allerta 🔴 o un terremoto >= M4.0: anche vocale e telefonata (CallMeBot, se configurato).
 # Ogni tipo di avviso parte al massimo una volta al giorno (stato in avvisi-stato.txt, escluso da Git).
 # Privatezza: Anthropic non vede nulla; il testo passa dai server di Telegram (i bot non hanno crittografia end-to-end).
 # Agenda automatica alle 7:10:  powershell -ExecutionPolicy Bypass -File .\avvisi-mattina.ps1 -Schedule
@@ -56,6 +57,14 @@ if ($Rassegna) {
     $gravi = @(Sezione $righe 'Allerte e terremoti' | Where-Object { $_ -match '^- (🟠|🔴|🌐)' } | ForEach-Object { Pulisci $_ })
     if ($gravi.Count -gt 0 -and -not (GiaInviato 'allerte')) {
         if (Invia-Avviso ("🚨 Allerte (fonti ufficiali)`n" + (($gravi | ForEach-Object { "• $_" }) -join "`n"))) { Segna 'allerte' }
+    }
+    # Urgenti (03/11): allerta ROSSA o terremoto >= M4.0 -> anche vocale + telefonata (una volta al giorno).
+    $urgenti = @($gravi | Where-Object { $_ -match '🔴' -or ($_ -match '🌐\s*M(\d+[.,]\d)' -and [double]($Matches[1] -replace ',', '.') -ge 4.0) })
+    if ($urgenti.Count -gt 0 -and -not (GiaInviato 'urgente')) {
+        $voce = "Attenzione, allerta da fonti ufficiali. " + (($urgenti | ForEach-Object { ($_ -replace '🔴|🟠|🌐', '' -replace '·', ',').Trim() }) -join '. ')
+        $okV = Invia-Vocale $voce
+        $okC = Chiama-Allarme "Jarvis: allerta grave dalle fonti ufficiali. Guarda Telegram."
+        if ($okV -or $okC) { Segna 'urgente' }
     }
     if (-not (GiaInviato 'rassegna')) {
         $top = @(Sezione $righe 'In evidenza' | ForEach-Object { if ($_ -match '^- \*\*(.+?)\*\*') { $Matches[1] } } | Select-Object -First 3)
