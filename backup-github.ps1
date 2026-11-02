@@ -1,8 +1,9 @@
 ﻿# Jarvis - backup su GitHub in repo PRIVATI. Sostituisce backup-jarvis.ps1 (OneDrive), deciso il 02/11/2026.
 # Su GitHub: agents (jarvis-agents), infra (jarvis-infra), vault SENZA Human/ (jarvis-vault),
 #            configurazione: .claude, CLAUDE.md, hermes-data, osiris (jarvis-config).
-# MAI su GitHub: Human/ (Git solo locale in DBVault\Human\.git), file .env, chiavi, .env/config.yaml/memorie di Hermes.
-# Prima di ogni commit controlla: niente .env/chiavi, niente segreti nel testo, niente Human/, niente file > 50 MB.
+# MAI su GitHub: Human/ (Git solo locale in DBVault\Human\.git), email e calendario (Machine/Contesto, Reports/Daily,
+#   log di briefing e debrief), file .env, chiavi, .env/config.yaml/memorie/skill di Hermes.
+# Prima di ogni commit controlla: niente .env/chiavi, niente segreti nel testo, niente Human/ né email/calendario, niente file > 50 MB.
 # Uso:         powershell -ExecutionPolicy Bypass -File .\backup-github.ps1
 # Automatico:  powershell -ExecutionPolicy Bypass -File .\backup-github.ps1 -Schedule   (ogni giorno alle 23:30)
 param([switch]$Schedule)
@@ -21,6 +22,8 @@ if ($Schedule) {
 
 $nomiVietati = '(^|/)(\.env(\..+)?|[^/]*\.(pem|key|pfx|p12)|id_rsa[^/]*|\.jarvis-backup-password)$'
 $segreti = 'sk-[A-Za-z0-9_\-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|\b\d{8,10}:AA[A-Za-z0-9_\-]{30,}|AIza[0-9A-Za-z_\-]{35}'
+# Nel vault: note personali, email, calendario e finanze non vanno mai su GitHub (vedi anche DBVault/.gitignore)
+$privatiVault = '^"?(Human/(?!AGENTS\.md$)|Machine/Contesto/|Machine/Reports/Daily/|Machine/Logs/[^/]*(daily-briefing|evening-debrief))'
 $utf8 = New-Object Text.UTF8Encoding($false)
 
 function Evento($stato, $dettaglio, $ok, $tot) {
@@ -42,7 +45,7 @@ function Salva($nome, $dir, [switch]$SoloLocale, [switch]$Vault) {
     if ($nomi.Count -gt 0) {
         $prob = @()
         $prob += $nomi | Where-Object { $_ -match $nomiVietati -and $_ -notmatch '\.env\.example$' } | ForEach-Object { "file vietato $_" }
-        if ($Vault) { $prob += $nomi | Where-Object { $_ -like 'Human/*' -and $_ -ne 'Human/AGENTS.md' } | ForEach-Object { "Human/ $_" } }
+        if ($Vault) { $prob += $nomi | Where-Object { $_ -match $privatiVault } | ForEach-Object { "dato privato $_" } }
         $prob += $nomi | Where-Object { $p = Join-Path $dir $_; (Test-Path $p -PathType Leaf) -and (Get-Item $p).Length -gt 50MB } | ForEach-Object { "file > 50 MB $_" }
         $aggiunte = (git -C $dir diff --cached -U0 --no-color) -join "`n"
         if ([regex]::IsMatch($aggiunte, "(?m)^\+.*($segreti)")) { $prob += "possibile segreto nel testo" }
@@ -65,14 +68,10 @@ function Salva($nome, $dir, [switch]$SoloLocale, [switch]$Vault) {
     return $null
 }
 
-# 1. Copia di Hermes nel repo jarvis-config: solo SOUL.md e skills (mai .env, config.yaml, memorie)
+# 1. Copia di Hermes nel repo jarvis-config: solo SOUL.md (mai .env, config.yaml, memorie; le skill sono quelle di serie, si reinstallano)
 $live = "$jarvis\hermes-data\live"
 New-Item -ItemType Directory -Force $live | Out-Null
 if (Test-Path "$hermes\SOUL.md") { Copy-Item "$hermes\SOUL.md" "$live\SOUL.md" -Force }
-if (Test-Path "$hermes\skills") {
-    $mb = ((Get-ChildItem "$hermes\skills" -Recurse -File | Measure-Object Length -Sum).Sum) / 1MB
-    if ($mb -lt 20) { robocopy "$hermes\skills" "$live\skills" /MIR /XF .env* *.key *.pem /NFL /NDL /NJH /NJS /NP | Out-Null }
-}
 
 # 2. Commit e push
 $errori = @()
