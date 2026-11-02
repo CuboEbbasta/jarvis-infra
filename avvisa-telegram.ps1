@@ -50,7 +50,12 @@ function Chiama-Allarme([string]$testo) {
     $t = $testo; if ($t.Length -gt 250) { $t = $t.Substring(0, 250) }
     Add-Type -AssemblyName System.Web
     $url = "https://api.callmebot.com/start.php?user=$([Web.HttpUtility]::UrlEncode($user))&text=$([Web.HttpUtility]::UrlEncode($t))&lang=it-IT-Standard-A&rpt=2&cc=missed"
-    try { Invoke-WebRequest $url -UseBasicParsing -TimeoutSec 60 | Out-Null; return $true }
+    if ($user -eq '@tuousername') { Write-Host "Chiamata non fatta: in callmebot.txt c'è ancora il segnaposto @tuousername"; return $false }
+    try {
+        $r = Invoke-WebRequest $url -UseBasicParsing -TimeoutSec 60
+        if ($r.Content -match 'not authorized|not received|Error|Warning') { Write-Host "Chiamata non fatta: CallMeBot non ti ha autorizzato (/start a @CallMeBot_API e username corretto)"; return $false }
+        return $true
+    }
     catch { Write-Host "Chiamata non fatta: CallMeBot non raggiungibile"; return $false }
 }
 if ($Testo)  { if (Invia-Avviso $Testo)    { Write-Host "Avviso inviato." } }
