@@ -30,6 +30,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     volumes:
       - ./litellm/config.yaml:/app/config.yaml:ro
+    networks: [default, osiris-llm]   # osiris-llm: rete dedicata, vista SOLO da OSIRIS (modello locale per le previsioni OI)
     ports:
       - "127.0.0.1:4000:4000"   # solo da questo PC, non dalla rete
 
@@ -46,6 +47,10 @@ services:
       - ../DBVault/Machine:/vault/Machine     # unica area scrivibile
     profiles: ["hermes"]                      # si avvia solo con --profile hermes
     # nessuna porta esposta: si usa da Telegram
+
+networks:
+  osiris-llm:
+    name: jarvis-osiris-llm      # solo litellm + osiris: OSIRIS non vede Ollama, il database né il resto del PC
 
 volumes:
   litellm-db:
