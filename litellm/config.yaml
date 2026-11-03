@@ -13,11 +13,11 @@ model_list:
       model: ollama_chat/qwen3:14b
       api_base: http://host.docker.internal:11434
 
-  - model_name: local-agent         # orchestratore (Hermes): contesto 32K per tool calling
+  - model_name: local-agent         # orchestratore (Hermes): contesto 64K, minimo richiesto da Hermes
     litellm_params:
-      model: ollama_chat/qwen3:14b
+      model: ollama_chat/qwen3:8b
       api_base: http://host.docker.internal:11434
-      num_ctx: 32768
+      num_ctx: 65536
 
   - model_name: local-vision        # immagini, appunti scritti a mano, schemi
     litellm_params:
