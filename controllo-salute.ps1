@@ -36,6 +36,18 @@ $llm = Http "http://localhost:4000/health/liveliness"
 Esito "LiteLLM (gateway)" $llm ($(if ($llm) { "attivo su :4000" } else { "non risponde: cd infra ; docker compose up -d" }))
 $herm = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match 'hermes' -and $_.CommandLine -match 'gateway' }).Count -gt 0
 Esito "Hermes (Telegram)" $herm ($(if ($herm) { "gateway in esecuzione" } else { "gateway fermo: hermes gateway start" })) -Avviso
+# Listener delle richieste di Hermes (rassegna|posta|salute|study): se e' fermo Hermes non puo' avviare gli agenti (03/11 era fermo da ore)
+$rich = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -match 'esegui-richieste' }).Count -gt 0
+Esito "Listener richieste di Hermes" $rich ($(if ($rich) { "in esecuzione" } else { "fermo: Start-ScheduledTask -TaskName 'Jarvis Richieste'" }))
+$osi = Http "http://localhost:3010"
+Esito "OSIRIS (mappa)" $osi ($(if ($osi) { "attivo su :3010" } else { "non risponde: cd osiris ; docker compose up -d" })) -Avviso
+# Stati agente rimasti 'running' da troppo tempo (processo interrotto senza chiudere lo stato)
+Get-ChildItem "$machine\Status\*-agent.json" -ErrorAction SilentlyContinue | ForEach-Object {
+    try { $sj = Get-Content $_.FullName -Raw -Encoding UTF8 | ConvertFrom-Json } catch { return }
+    if ($sj.state -eq 'running' -and $sj.started -and ((Get-Date) - [datetime]$sj.started).TotalHours -gt 6) {
+        Esito "Stato di $($sj.agent)" $false "risulta 'running' dal $(([datetime]$sj.started).ToString('dd/MM HH:mm')): processo interrotto?" -Avviso
+    }
+}
 
 # 2. Risultati recenti
 $oggi = Get-Date -Format "yyyy-MM-dd"
@@ -49,7 +61,7 @@ $brief = Test-Path "$machine\Reports\Daily\$oggi-briefing.md"
 Esito "Briefing di oggi" ($brief -or (Get-Date).Hour -lt 8) ($(if ($brief) { "presente" } elseif ((Get-Date).Hour -lt 8) { "non ancora (parte alle 7:10)" } else { "mancante: PC spento alle 7:10?" })) -Avviso
 
 # 3. Attività pianificate di Windows
-foreach ($t in "Jarvis Rassegna", "Jarvis Backup") {
+foreach ($t in "Jarvis Rassegna", "Jarvis Backup", "Jarvis Posta", "Jarvis Agenda") {
     $info = Get-ScheduledTask -TaskName $t -ErrorAction SilentlyContinue | Get-ScheduledTaskInfo -ErrorAction SilentlyContinue
     if (-not $info) { Esito "Attività '$t'" $false "non registrata" -Avviso; continue }
     $ok = $info.LastTaskResult -in 0, 267011   # 267011 = non ancora eseguita
