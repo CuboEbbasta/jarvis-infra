@@ -1,3 +1,8 @@
 .env
 avvisi-stato.txt
 callmebot.txt
+
+# copie locali delle attivita pianificate (nascondi-attivita.ps1)
+hidden/
+
+antigravity-blocco-fino-a.txt

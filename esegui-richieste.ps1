@@ -31,7 +31,7 @@ $ultimo = @{}
 
 function Interpreta([string]$riga) {
     $r = ($riga -replace '^﻿', '').Trim().ToLower()
-    if ($r -match '^(rassegna|posta|salute)$') { return @{ azione = $r; arg = $null } }
+    if ($r -match '^(rassegna|posta|salute|dashboard)$') { return @{ azione = $r; arg = $null } }
     $m = [regex]::Match(($riga -replace '^﻿', '').Trim(), '^(?i:study)\s+([A-Za-z][A-Za-z0-9_-]{0,39})$')
     if ($m.Success) { return @{ azione = 'study'; arg = $m.Groups[1].Value } }
     return $null
@@ -45,6 +45,7 @@ function Esegui($a) {
             'posta'    { $out = & docker compose run --rm posta 2>&1 }
             'study'    { $out = & docker compose run --rm study --course $a.arg 2>&1 }
             'salute'   { $out = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'controllo-salute.ps1') 2>&1 }
+            'dashboard' { $out = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'genera-dashboard.ps1') 2>&1 }
         }
         return @{ codice = $LASTEXITCODE; righe = @($out | ForEach-Object { "$_" } | Select-Object -Last 15) }
     } finally { Pop-Location }
@@ -59,12 +60,16 @@ function Elabora([IO.FileInfo]$f) {
     $inizio = Get-Date
     $chiave = if ($a) { "$($a.azione) $($a.arg)".Trim() } else { '' }
     if (-not $a) {
-        $stato = 'rifiutata'; $righe = @('Azione non in elenco. Ammesse: rassegna, posta, salute, study <Corso>.'); $codice = ''
+        $stato = 'rifiutata'; $righe = @('Azione non in elenco. Ammesse: rassegna, posta, salute, dashboard, study <Corso>.'); $codice = ''
     } elseif ($ultimo.ContainsKey($chiave) -and ($inizio - $ultimo[$chiave]).TotalMinutes -lt 15) {
         $stato = 'saltata'; $righe = @("'$chiave' già eseguita meno di 15 minuti fa."); $codice = ''
     } else {
         $ultimo[$chiave] = $inizio
-        $r = Esegui $a; $codice = $r.codice; $righe = $r.righe
+        # stato "in corso" visibile alla dashboard (Machine/Status/richiesta-in-corso.json): solo azione e ora d'inizio
+        $inCorso = Join-Path $root 'DBVault\Machine\Status\richiesta-in-corso.json'
+        try { Set-Content $inCorso (@{ azione = $chiave; inizio = $inizio.ToString('s') } | ConvertTo-Json -Compress) -Encoding UTF8 } catch {}
+        try { $r = Esegui $a } finally { Remove-Item $inCorso -ErrorAction SilentlyContinue }
+        $codice = $r.codice; $righe = $r.righe
         $stato = if ($codice -eq 0) { 'ok' } else { 'errore' }
     }
     $min = [math]::Round(((Get-Date) - $inizio).TotalMinutes, 1)
