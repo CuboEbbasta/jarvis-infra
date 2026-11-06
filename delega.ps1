@@ -53,10 +53,25 @@ if ($A -eq 'antigravity') {
     if (Get-Content $giorni | ForEach-Object { $_.Trim() } | Where-Object { $_ -eq $oggi }) { Rifiuta "oggi ($oggi) e' un giorno riservato all'app Gemini: Antigravity non parte (usa -OkUtente solo se l'utente lo autorizza)." }
   }
   # Blocco fino al reset della quota (scritto da questo script quando Antigravity segnala la quota finita)
+  # La quota e' PER MODELLO: una riga per modello "modello|AAAA-MM-GGTHH:MM:SS" (una riga con la sola data vale per il modello predefinito).
+  # Se il modello richiesto (o il predefinito) e' bloccato e NON e' stato imposto con -Modello, si passa al primo non bloccato dell'elenco.
   $blocco = Join-Path $PSScriptRoot 'antigravity-blocco-fino-a.txt'
+  $blocchi = @{}
   if (Test-Path $blocco) {
-    $fine = [datetime]::MinValue
-    if ([datetime]::TryParse((Get-Content $blocco -Raw).Trim(), [ref]$fine) -and (Get-Date) -lt $fine) { Rifiuta "quota di Antigravity finita: ritenta dopo il $($fine.ToString('dd/MM HH:mm'))." }
+    foreach ($riga in (Get-Content $blocco)) {
+      $r = $riga.Trim(); if (-not $r) { continue }
+      $nome = 'gemini-3.8-flash-high'; $quando = $r
+      if ($r -match '^([^|]+)\|(.+)$') { $nome = $Matches[1].Trim(); $quando = $Matches[2].Trim() }
+      $f = [datetime]::MinValue
+      if ([datetime]::TryParse($quando, [ref]$f)) { $blocchi[$nome] = $f }
+    }
+  }
+  $preferenze = @('gemini-3.8-flash-high', 'gemini-3.8-flash-medium', 'gemini-3.8-flash-low', 'claude-sonnet-4-6', 'gpt-oss-120b-medium')
+  $model = if ($Modello) { $Modello } else { 'gemini-3.8-flash-high' }
+  if ($blocchi.ContainsKey($model) -and (Get-Date) -lt $blocchi[$model]) {
+    $alt = if ($Modello) { $null } else { $preferenze | Where-Object { -not ($blocchi.ContainsKey($_) -and (Get-Date) -lt $blocchi[$_]) } | Select-Object -First 1 }
+    if ($alt) { Write-Host "Modello ${model} in quota esaurita fino al $($blocchi[$model].ToString('dd/MM HH:mm')): uso $alt." -ForegroundColor Yellow; $model = $alt }
+    else { Rifiuta "quota di Antigravity finita per ${model}: ritenta dopo il $($blocchi[$model].ToString('dd/MM HH:mm'))." }
   }
   # Tetto giornaliero: al massimo 2 lavori reali al giorno, per non consumare la quota dell'abbonamento (condivisa con altro? non confermato)
   $logDeleghe = "$jarvis\DBVault\Machine\Logs\events.jsonl"
@@ -111,7 +126,7 @@ foreach ($f in $ScriviFile) {
 }
 $json = '{"allowNonWorkspaceAccess": false, "enableTerminalSandbox": true, "toolPermission": "request-review", "agentMode": "default", "permissions": {"allow": [' + (($regole | ForEach-Object { '"' + $_ + '"' }) -join ', ') + ']}}'
 $settings = Join-Path $env:USERPROFILE '.gemini\antigravity-cli\settings.json'
-$model = if ($Modello) { $Modello } else { 'gemini-3.8-flash-high' }
+if (-not $model) { $model = if ($Modello) { $Modello } else { 'gemini-3.8-flash-high' } }
 if ($Prova) { Write-Host "[prova] agy -p <compito> --model $model --sandbox ; regole allow: $($regole.Count) (scrittura: $($ScriviFile -join ', '))"; Registra 'prova'; exit 0 }
 [IO.File]::WriteAllText($settings, $json + "`n", (New-Object Text.UTF8Encoding $false))
 Set-Location $cartella
@@ -122,7 +137,10 @@ if ($out -match '"status"\s*:\s*"ERROR"' -and $out -match '(?i)RESOURCE_EXHAUSTE
   $quando = if ($out -match 'Resets in ([0-9hms]+)') { " Si resetta fra $($Matches[1])." } else { '' }
   if ($out -match 'Resets in (?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?') {   # ricorda fino a quando non lanciare piu' nulla
     $ore = [int]($Matches[1] -as [int]); $min = [int]($Matches[2] -as [int])
-    Set-Content (Join-Path $PSScriptRoot 'antigravity-blocco-fino-a.txt') ((Get-Date).AddHours($ore).AddMinutes($min + 5).ToString('s')) -Encoding ASCII
+    $fileBlocco = Join-Path $PSScriptRoot 'antigravity-blocco-fino-a.txt'
+    $altre = @(); if (Test-Path $fileBlocco) { $altre = @(Get-Content $fileBlocco | Where-Object { $_.Trim() -and -not $_.StartsWith("$model|") }) }
+    $altre += "$model|" + (Get-Date).AddHours($ore).AddMinutes($min + 5).ToString('s')
+    Set-Content $fileBlocco $altre -Encoding ASCII
   }
   try { . "$PSScriptRoot\avvisa-telegram.ps1"; Invia-Avviso "Antigravity ha finito la quota di utilizzo.$quando" | Out-Null } catch {}
 }
