@@ -6,6 +6,7 @@
 param(
     [switch]$Tailscale,
     [switch]$Ricostruisci,
+    [switch]$SenzaCostruire,   # avvio automatico: se manca web\dist non esegue npm, segnala 'dist mancante' ed esce
     [string]$TailscaleIp = '100.95.213.52'
 )
 # Continue: i comandi nativi (docker, npm) scrivono l'avanzamento su stderr; gli esiti si controllano con $LASTEXITCODE.
@@ -29,6 +30,7 @@ if ($Tailscale) {
 
 # Web app: serve web\dist (montata in sola lettura nel container)
 $dist = Join-Path $app 'web\dist\index.html'
+if ($SenzaCostruire -and -not $Ricostruisci -and -not (Test-Path $dist)) { Write-Host 'dist mancante: esegui avvia-app.ps1 -Ricostruisci a mano (niente npm in avvio automatico)'; exit 1 }
 if ($Ricostruisci -or -not (Test-Path $dist)) {
     Write-Host 'Costruisco la web app (npm ci && npm run build)...'
     Push-Location (Join-Path $app 'web')

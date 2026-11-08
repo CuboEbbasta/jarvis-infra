@@ -1,0 +1,7 @@
+versione: 1
+id: lumetto
+nome: ComicsReader
+descrizione: "App Swift per leggere fumetti (alias Lumetto)."
+cartella_vault: Projects/ComicsReader
+tag: [app, swift, fumetti]
+azioni: []
