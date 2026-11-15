@@ -1,6 +1,6 @@
 versione: 1
 id: jarvis
-nome: Jarvis
+nome: Brina
 descrizione: "Assistente AI locale: agenti, gateway dei modelli, vault e Control Center."
 cartella_vault: Projects/Jarvis
 tag: [ia, locale]
