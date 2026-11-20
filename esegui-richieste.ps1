@@ -1,6 +1,6 @@
 ﻿# Brina - esecutore delle richieste di Hermes (decisione dell'utente, 03/11/2026: avvio agenti con ELENCO CHIUSO).
 # Hermes NON ha accesso al terminale di Windows: scrive un file .txt in DBVault\Machine\Richieste\ con UNA riga:
-#     rassegna  |  posta  |  salute  |  study <Corso>        (es. "study Programmazione")
+#     rassegna  |  posta  |  salute  |  dashboard  |  doctor  |  study <Corso>        (es. "study Programmazione")
 # Questo script (sul PC) esegue solo queste azioni, scrive l'esito in Machine\Richieste\Esiti\ e avvisa su Telegram.
 # Qualsiasi altra riga viene rifiutata. Stessa azione al massimo una volta ogni 15 minuti.
 # Prova una volta:        powershell -ExecutionPolicy Bypass -File .\esegui-richieste.ps1
@@ -31,7 +31,7 @@ $ultimo = @{}
 
 function Interpreta([string]$riga) {
     $r = ($riga -replace '^﻿', '').Trim().ToLower()
-    if ($r -match '^(rassegna|posta|salute|dashboard)$') { return @{ azione = $r; arg = $null } }
+    if ($r -match '^(rassegna|posta|salute|dashboard|doctor)$') { return @{ azione = $r; arg = $null } }
     $m = [regex]::Match(($riga -replace '^﻿', '').Trim(), '^(?i:study)\s+([A-Za-z][A-Za-z0-9_-]{0,39})$')
     if ($m.Success) { return @{ azione = 'study'; arg = $m.Groups[1].Value } }
     return $null
@@ -44,6 +44,7 @@ function Esegui($a) {
             'rassegna' { $out = & docker compose run --rm rassegna 2>&1 }
             'posta'    { $out = & docker compose run --rm posta 2>&1 }
             'study'    { $out = & docker compose run --rm study --course $a.arg 2>&1 }
+            'doctor'   { $out = & docker compose run --rm doctor 2>&1 }
             'salute'   { $out = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'controllo-salute.ps1') 2>&1 }
             'dashboard' { $out = & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'genera-dashboard.ps1') 2>&1 }
         }
@@ -60,7 +61,7 @@ function Elabora([IO.FileInfo]$f) {
     $inizio = Get-Date
     $chiave = if ($a) { "$($a.azione) $($a.arg)".Trim() } else { '' }
     if (-not $a) {
-        $stato = 'rifiutata'; $righe = @('Azione non in elenco. Ammesse: rassegna, posta, salute, dashboard, study <Corso>.'); $codice = ''
+        $stato = 'rifiutata'; $righe = @('Azione non in elenco. Ammesse: rassegna, posta, salute, dashboard, doctor, study <Corso>.'); $codice = ''
     } elseif ($ultimo.ContainsKey($chiave) -and ($inizio - $ultimo[$chiave]).TotalMinutes -lt 15) {
         $stato = 'saltata'; $righe = @("'$chiave' già eseguita meno di 15 minuti fa."); $codice = ''
     } else {
@@ -107,7 +108,7 @@ function Verifica-Lavoro($l) {
     if ($TIPI[[string]$l.tipo] -ne $l.destinazione) { return 'destinazione non coerente con il tipo' }
     if ($l.privacy -notin 1, 2, 3) { return 'privacy non valida' }
     if ($l.tipo -eq 'agente') {
-        if ($l.agente -notin 'rassegna', 'posta', 'salute', 'dashboard', 'study') { return 'agente non ammesso' }
+        if ($l.agente -notin 'rassegna', 'posta', 'salute', 'dashboard', 'study', 'doctor') { return 'agente non ammesso' }
         if ($l.agente -eq 'study' -and -not ([string]$l.corso -match '^[A-Za-z][A-Za-z0-9_-]{0,39}$')) { return 'corso non valido' }
         return $null
     }
