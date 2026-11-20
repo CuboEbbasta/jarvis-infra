@@ -1,0 +1,8 @@
+# Esempio (non viene letto: rinomina in .yml e cambia i valori)
+versione: 1
+id: esempio-youtube
+nome: "Esempio"
+piattaforma: youtube
+gruppo: azienda
+handle: "@esempio"
+url: https://www.youtube.com/@esempio
