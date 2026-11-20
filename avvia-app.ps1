@@ -1,4 +1,4 @@
-# Jarvis Control Center - avvia l'app (API + database + web app servita dallo stesso backend).
+# Brina Control Center - avvia l'app (API + database + web app servita dallo stesso backend).
 # Uso:  powershell -ExecutionPolicy Bypass -File infra\avvia-app.ps1 [-Tailscale] [-Ricostruisci]
 #   -Tailscale     pubblica l'API anche sull'IP Tailscale del PC (opt-in; mai 0.0.0.0)
 #   -Ricostruisci  ricostruisce la web app (npm ci + build) e l'immagine api anche se gia' presenti
@@ -65,5 +65,5 @@ for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
 }
 if (-not $ok) { Write-Host 'L''API non risponde entro 2 minuti. Guarda:  cd app; docker compose logs api --tail 50'; exit 1 }
 
-Write-Host 'Jarvis Control Center attivo: http://127.0.0.1:3030/' -ForegroundColor Green
+Write-Host 'Brina Control Center attivo: http://127.0.0.1:3030/' -ForegroundColor Green
 if ($Tailscale) { Write-Host "Dal telefono (Tailscale attivo): http://${TailscaleIp}:3030/" -ForegroundColor Green }

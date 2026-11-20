@@ -1,4 +1,4 @@
-﻿# Jarvis - avvio dopo l'accensione del PC. Avvia solo ciò che è spento (si può lanciare quante volte vuoi), poi fa il controllo salute.
+﻿# Brina - avvio dopo l'accensione del PC. Avvia solo ciò che è spento (si può lanciare quante volte vuoi), poi fa il controllo salute.
 # Ordine: Ollama -> Docker Desktop -> LiteLLM + database (Docker) -> Hermes (Telegram) -> controllo salute.
 # Uso a mano:          powershell -ExecutionPolicy Bypass -File C:\Users\fonta\Documents\STUDIO\Jarvis\infra\avvia-jarvis.ps1
 # Automatico all'accesso a Windows (una volta sola):  ... -File ...\avvia-jarvis.ps1 -Schedule

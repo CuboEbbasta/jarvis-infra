@@ -1,4 +1,4 @@
-﻿# Jarvis - backup su GitHub in repo PRIVATI. Sostituisce backup-jarvis.ps1 (OneDrive), deciso il 02/11/2026.
+﻿# Brina - backup su GitHub in repo PRIVATI. Sostituisce backup-jarvis.ps1 (OneDrive), deciso il 02/11/2026.
 # Su GitHub: agents (jarvis-agents), infra (jarvis-infra), vault SENZA Human/ (jarvis-vault),
 #            configurazione: .claude, CLAUDE.md, hermes-data, osiris (jarvis-config).
 # MAI su GitHub: Human/ (Git solo locale in DBVault\Human\.git), email e calendario (Machine/Contesto, Reports/Daily,
@@ -27,7 +27,7 @@ $privatiVault = '^"?(Human/(?!AGENTS\.md$)|Machine/Contesto/|Machine/Reports/Dai
 $utf8 = New-Object Text.UTF8Encoding($false)
 
 function Evento($stato, $dettaglio, $ok, $tot) {
-    # Standard Jarvis: riga in Machine/Logs/events.jsonl + stato in Machine/Status/backup.md (Dashboard, controllo salute)
+    # Standard Brina: riga in Machine/Logs/events.jsonl + stato in Machine/Status/backup.md (Dashboard, controllo salute)
     $ts = (Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz")
     $riga = [ordered]@{ ts = $ts; agent = "backup"; run_id = (Get-Date).ToString("yyyyMMdd-HHmmss"); event = "end"; status = $stato; reason = $dettaglio; metrics = @{ repo_ok = $ok; repo_totali = $tot } } | ConvertTo-Json -Compress
     [IO.File]::AppendAllText("$machine\Logs\events.jsonl", $riga + "`n", $utf8)

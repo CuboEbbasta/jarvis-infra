@@ -1,7 +1,7 @@
 versione: 1
 id: assistente-personale
 nome: Assistente-Personale
-descrizione: "App di produttivita (Capacitor/Electron), a parte rispetto a Jarvis."
+descrizione: "App di produttivita (Capacitor/Electron), a parte rispetto a Brina."
 cartella_vault: Projects/Assistente-Personale
 tag: [app, produttivita]
 azioni: []

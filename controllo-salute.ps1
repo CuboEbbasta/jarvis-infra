@@ -1,4 +1,4 @@
-﻿# Jarvis - controllo salute: verifica che i pezzi di Jarvis funzionino e scrive il risultato nel vault.
+﻿# Brina - controllo salute: verifica che i pezzi di Brina funzionino e scrive il risultato nel vault.
 # Non usa chiavi, non legge .env, non chiama modelli (zero token): solo controlli locali.
 # Una volta:    powershell -ExecutionPolicy Bypass -File .\controllo-salute.ps1
 # Automatico:   powershell -ExecutionPolicy Bypass -File .\controllo-salute.ps1 -Schedule   (ogni 2 ore)
@@ -79,7 +79,7 @@ $utf8 = New-Object Text.UTF8Encoding($false)
 New-Item -ItemType Directory -Force "$machine\Status", "$machine\Logs" | Out-Null
 $md = @("---", "type: agent-status", "agent: salute", "state: $stato", "task: `"Controllo salute`"", "phase: `"finito`"",
         "progress: `"$problemi problemi`"", "model: nessuno", "updated: $ts", "ended: $ts", "result: `"$problemi problemi`"", "---",
-        "# Salute di Jarvis — $(Get-Date -Format 'dd/MM HH:mm')", "", "| Componente | Esito | Dettaglio |", "|---|---|---|") + $righe +
+        "# Salute di Brina — $(Get-Date -Format 'dd/MM HH:mm')", "", "| Componente | Esito | Dettaglio |", "|---|---|---|") + $righe +
        @("", "✅ ok · ⚠️ da guardare · ❌ non funziona. File generato automaticamente da infra/controllo-salute.ps1: non modificare.")
 [IO.File]::WriteAllText("$machine\Status\salute.md", ($md -join "`n") + "`n", $utf8)
 $ev = [ordered]@{ ts = $ts; agent = "salute"; run_id = (Get-Date).ToString("yyyyMMdd-HHmmss"); event = "end"; status = $stato; metrics = @{ problemi = $problemi } } | ConvertTo-Json -Compress
@@ -90,7 +90,7 @@ $firma = ($rossi | Sort-Object) -join ", "
 $prima = if (Test-Path $memo) { (Get-Content $memo -Raw -Encoding UTF8).Trim() } else { "" }
 if ($firma -ne $prima) {
     . "$PSScriptRoot\avvisa-telegram.ps1"
-    $testo = if ($firma) { "⚠️ Jarvis: non funziona -> $firma. Dettagli: Machine/Status/salute.md" } else { "✅ Jarvis: tutto di nuovo a posto." }
+    $testo = if ($firma) { "⚠️ Brina: non funziona -> $firma. Dettagli: Machine/Status/salute.md" } else { "✅ Brina: tutto di nuovo a posto." }
     if ($prima -or $firma) { if (Invia-Avviso $testo) { [IO.File]::WriteAllText($memo, $firma, $utf8) } }
 }
 $righe | ForEach-Object { Write-Host $_ }

@@ -1,4 +1,4 @@
-﻿# Jarvis - PROVA DI RIPRISTINO dei backup su GitHub: scarica (clone superficiale) i repo di backup in una cartella temporanea,
+﻿# Brina - PROVA DI RIPRISTINO dei backup su GitHub: scarica (clone superficiale) i repo di backup in una cartella temporanea,
 # controlla che siano leggibili e che NON contengano segreti o dati privati, poi cancella tutto.
 # Non scrive nulla nei repo e non tocca i tuoi file. Uso: powershell -ExecutionPolicy Bypass -File .\test-ripristino.ps1
 $ErrorActionPreference = 'Continue'

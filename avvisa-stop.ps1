@@ -1,4 +1,4 @@
-# Jarvis - hook "Stop" di Claude Code: avvisa su Telegram (via bot di Hermes) quando Claude Code smette di lavorare.
+# Brina - hook "Stop" di Claude Code: avvisa su Telegram (via bot di Hermes) quando Claude Code smette di lavorare.
 # Al massimo UN avviso ogni 10 minuti, per non riempirti di messaggi durante una chat normale.
 # Non stampa nulla e non fallisce mai (un hook rotto non deve bloccare il lavoro). Testo fisso: nessun contenuto della chat.
 $ErrorActionPreference = 'SilentlyContinue'

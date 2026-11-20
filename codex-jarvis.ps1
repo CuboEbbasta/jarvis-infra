@@ -1,4 +1,4 @@
-# Jarvis - avvia Codex con la configurazione separata e protetta (CODEX_HOME = ~\.codex-jarvis).
+# Brina - avvia Codex con la configurazione separata e protetta (CODEX_HOME = ~\.codex-jarvis).
 # Uso:  .\codex-jarvis.ps1                  -> Codex in Jarvis\agents
 #       .\codex-jarvis.ps1 -Cartella <percorso di un repo NON privato>
 #       .\codex-jarvis.ps1 -Login           -> accesso (usa fontanimathias@gmail.com)

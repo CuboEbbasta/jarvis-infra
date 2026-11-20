@@ -1,4 +1,4 @@
-﻿# Jarvis - esecutore delle richieste di Hermes (decisione dell'utente, 03/11/2026: avvio agenti con ELENCO CHIUSO).
+﻿# Brina - esecutore delle richieste di Hermes (decisione dell'utente, 03/11/2026: avvio agenti con ELENCO CHIUSO).
 # Hermes NON ha accesso al terminale di Windows: scrive un file .txt in DBVault\Machine\Richieste\ con UNA riga:
 #     rassegna  |  posta  |  salute  |  study <Corso>        (es. "study Programmazione")
 # Questo script (sul PC) esegue solo queste azioni, scrive l'esito in Machine\Richieste\Esiti\ e avvisa su Telegram.

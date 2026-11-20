@@ -1,4 +1,4 @@
-# Jarvis - fa girare le attivita' pianificate Jarvis senza finestre (via lancia-nascosto.vbs).
+# Brina - fa girare le attivita' pianificate Brina senza finestre (via lancia-nascosto.vbs).
 # Causa del problema: powershell.exe -WindowStyle Hidden mostra comunque la finestra per un istante, e docker apre altre console.
 # Cosa fa: per ogni attivita' 'Jarvis *' che lancia powershell.exe salva il comando in infra\hidden\<nome>.cmdline,
 #          esporta il vecchio XML in infra\hidden\backup\ e sostituisce l'azione con wscript.exe //B lancia-nascosto.vbs <file>.

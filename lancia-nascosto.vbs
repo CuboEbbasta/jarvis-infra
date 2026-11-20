@@ -1,4 +1,4 @@
-' Jarvis - esegue un comando SENZA mostrare nessuna finestra (nemmeno il lampo di powershell/cmd).
+' Brina - esegue un comando SENZA mostrare nessuna finestra (nemmeno il lampo di powershell/cmd).
 ' Uso (dall'Utilita' di pianificazione): wscript.exe //B //Nologo lancia-nascosto.vbs "<file con la riga di comando>"
 ' Il file .cmdline contiene una sola riga: il comando completo. Creato da nascondi-attivita.ps1.
 Set fso = CreateObject("Scripting.FileSystemObject")

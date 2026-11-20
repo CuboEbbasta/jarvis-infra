@@ -1,4 +1,4 @@
-# Jarvis - aggiorna i modelli consentiti alla chiave di un agente (la chiave resta la stessa)
+# Brina - aggiorna i modelli consentiti alla chiave di un agente (la chiave resta la stessa)
 # Uso: powershell -ExecutionPolicy Bypass -File .\update-agent-key.ps1 -Agent study-agent -Models local-fast,local-private,local-vision
 param([Parameter(Mandatory)][string]$Agent, [Parameter(Mandatory)][string[]]$Models)
 # powershell -File passa 'a,b,c' come unica stringa: la divido sulle virgole

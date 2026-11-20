@@ -1,4 +1,4 @@
-# Jarvis - crea una chiave LiteLLM dedicata a un agente (solo modelli locali, con budget) e la salva in agents/.env
+# Brina - crea una chiave LiteLLM dedicata a un agente (solo modelli locali, con budget) e la salva in agents/.env
 # Uso: powershell -ExecutionPolicy Bypass -File .\new-agent-key.ps1 -Agent study-agent
 param([Parameter(Mandatory)][string]$Agent, [string[]]$Models = @('local-fast','local-private'), [double]$BudgetUsd = 1, [string]$EnvFile = '')
 

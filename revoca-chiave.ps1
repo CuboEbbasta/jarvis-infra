@@ -1,4 +1,4 @@
-# Jarvis - revoca chiavi LiteLLM per alias (es. chiavi di prova non piu' usate).
+# Brina - revoca chiavi LiteLLM per alias (es. chiavi di prova non piu' usate).
 # Uso: powershell -ExecutionPolicy Bypass -File .\revoca-chiave.ps1 -Alias osiris-oi,osiris-oi-2
 param([Parameter(Mandatory)][string[]]$Alias)
 $Alias = @($Alias | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })

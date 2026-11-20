@@ -1,4 +1,4 @@
-﻿# Jarvis - genera la dashboard con DATI REALI dello stato dei servizi e degli agenti.
+﻿# Brina - genera la dashboard con DATI REALI dello stato dei servizi e degli agenti.
 # Prende la grafica da Sandbox-Antigravity\ui-prototipi (dashboard.html/css/js) e scrive dati-reali.js accanto.
 # Output: DBVault\Machine\Dashboard-web\dashboard.html  (si apre con doppio clic; solo sul PC)
 # Uso: powershell -ExecutionPolicy Bypass -File .\genera-dashboard.ps1 [-Apri]

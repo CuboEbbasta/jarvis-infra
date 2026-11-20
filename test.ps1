@@ -2,7 +2,7 @@
 $key = (Get-Content "$PSScriptRoot\.env" | Where-Object { $_ -match '^LITELLM_MASTER_KEY=' }) -replace '^LITELLM_MASTER_KEY=',''
 $body = @{
   model    = "local-fast"
-  messages = @(@{ role = "user"; content = "Rispondi solo con: Jarvis gateway operativo" })
+  messages = @(@{ role = "user"; content = "Rispondi solo con: Brina gateway operativo" })
 } | ConvertTo-Json -Depth 5
 $sw = [Diagnostics.Stopwatch]::StartNew()
 $r = Invoke-RestMethod -Uri "http://localhost:4000/v1/chat/completions" -Method Post `

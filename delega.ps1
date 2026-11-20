@@ -1,4 +1,4 @@
-# Jarvis - delega un compito a Codex o ad Antigravity (agy) in modo sicuro (ADR-0008).
+# Brina - delega un compito a Codex o ad Antigravity (agy) in modo sicuro (ADR-0008).
 # Prima la PRIVACY: senza -Privacy 1 (o 2 con -OkUtente) non parte. Poi il perimetro: cartelle ammesse, mai il vault.
 # Esempi:
 #   .\delega.ps1 -A codex -Cartella C:\Users\fonta\Documents\STUDIO\Jarvis\agents -Privacy 1 -Compito "Rivedi jarvis/gateway.py (sola lettura)"

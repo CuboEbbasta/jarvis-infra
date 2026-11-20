@@ -1,5 +1,5 @@
 ﻿# SOSTITUITO da backup-github.ps1 il 02/11/2026 (backup su GitHub invece di OneDrive). Non usare.
-# Jarvis - backup CIFRATO (restic) di vault, codice e config di Hermes su OneDrive. Microsoft vede solo blocchi cifrati.
+# Brina - backup CIFRATO (restic) di vault, codice e config di Hermes su OneDrive. Microsoft vede solo blocchi cifrati.
 # Prima volta:  winget install restic.restic   (poi riapri PowerShell)
 #               powershell -ExecutionPolicy Bypass -File .\backup-jarvis.ps1 -Init
 # Backup:       powershell -ExecutionPolicy Bypass -File .\backup-jarvis.ps1
@@ -43,7 +43,7 @@ $livelli = @(
 )
 function DimensioneMB { if (Test-Path $repo) { [math]::Round(((Get-ChildItem $repo -Recurse -File | Measure-Object Length -Sum).Sum) / 1MB, 1) } else { 0 } }
 function Evento($stato, $dettaglio) {
-    # Standard Jarvis: riga in Machine/Logs/events.jsonl + stato in Machine/Status/backup.md (Dashboard)
+    # Standard Brina: riga in Machine/Logs/events.jsonl + stato in Machine/Status/backup.md (Dashboard)
     $machine = "$jarvis\DBVault\Machine"
     $utf8 = New-Object Text.UTF8Encoding($false)
     $ts = (Get-Date).ToString("yyyy-MM-ddTHH:mm:sszzz"); $mb = DimensioneMB

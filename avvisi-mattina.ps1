@@ -1,4 +1,4 @@
-﻿# Jarvis - avvisi del mattino su Telegram, preparati SOLO sul PC (decisione dell'utente, 03/11/2026).
+﻿# Brina - avvisi del mattino su Telegram, preparati SOLO sul PC (decisione dell'utente, 03/11/2026).
 #   -Agenda    impegni di oggi da Machine\Contesto\Calendario.md (scritto dal Posta Agent). NON passa da Claude.
 #   -Rassegna  3 notizie "In evidenza" + allerte gravi (🟠/🔴 Protezione Civile, terremoti rilevanti) della rassegna di oggi.
 #              Se c'è un'allerta 🔴 o un terremoto >= M4.0: anche vocale e telefonata (CallMeBot, se configurato).
@@ -63,7 +63,7 @@ if ($Rassegna) {
     if ($urgenti.Count -gt 0 -and -not (GiaInviato 'urgente')) {
         $voce = "Attenzione, allerta da fonti ufficiali. " + (($urgenti | ForEach-Object { ($_ -replace '🔴|🟠|🌐', '' -replace '·', ',').Trim() }) -join '. ')
         $okV = Invia-Vocale $voce
-        $okC = Chiama-Allarme "Jarvis: allerta grave dalle fonti ufficiali. Guarda Telegram."
+        $okC = Chiama-Allarme "Brina: allerta grave dalle fonti ufficiali. Guarda Telegram."
         if ($okV -or $okC) { Segna 'urgente' }
     }
     if (-not (GiaInviato 'rassegna')) {

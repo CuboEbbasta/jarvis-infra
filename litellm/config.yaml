@@ -1,4 +1,4 @@
-# Jarvis Model Gateway - LiteLLM
+# Brina Model Gateway - LiteLLM
 # Gli agenti chiamano i NOMI LOGICI (model_name), mai il provider direttamente.
 
 model_list:

@@ -1,7 +1,7 @@
 {
   "versione": 1,
   "tetto_secondi": 420,
-  "nota": "Config di avvia-tutto.ps1 (schema fisso, validato all'avvio: proprieta' o tipi sconosciuti vengono rifiutati). Nessun segreto qui. Per spegnere una voce metti abilitato false. Segnaposto ammessi nei percorsi: {ProgramFiles} {LocalAppData} {UserProfile} {Jarvis}; i percorsi relativi partono dalla cartella Jarvis. Vietati & | < > ^ % virgolette ; e a-capo. Tipi: docker, tailscale, http, compose, script, task, cli, processo.",
+  "nota": "Config di avvia-tutto.ps1 (schema fisso, validato all'avvio: proprieta' o tipi sconosciuti vengono rifiutati). Nessun segreto qui. Per spegnere una voce metti abilitato false. Segnaposto ammessi nei percorsi: {ProgramFiles} {LocalAppData} {UserProfile} {Brina}; i percorsi relativi partono dalla cartella Brina. Vietati & | < > ^ % virgolette ; e a-capo. Tipi: docker, tailscale, http, compose, script, task, cli, processo.",
   "items": [
     { "nome": "Docker Desktop", "tipo": "docker", "obbligatorio": true, "abilitato": true,
       "controllo": "docker info", "avvio": "{ProgramFiles}\\Docker\\Docker\\Docker Desktop.exe", "attesa_secondi": 240,
@@ -21,7 +21,7 @@
     { "nome": "OSIRIS", "tipo": "compose", "obbligatorio": false, "abilitato": true,
       "controllo": "jarvis-osiris,jarvis-osiris-intel", "avvio": "osiris\\docker-compose.yml#", "attesa_secondi": 90,
       "note": "Mappa OSINT su http://localhost:3010 (solo questo PC); non ricostruisce." },
-    { "nome": "Jarvis Control Center (API e database)", "tipo": "script", "obbligatorio": true, "abilitato": true,
+    { "nome": "Brina Control Center (API e database)", "tipo": "script", "obbligatorio": true, "abilitato": true,
       "controllo": "http://127.0.0.1:3030/api/health", "avvio": "infra\\avvia-app.ps1", "attesa_secondi": 150,
       "note": "Riusa avvia-app.ps1 con -SenzaCostruire (mai npm ci all'avvio) e mantiene l'override Tailscale se il contenitore lo usa." },
     { "nome": "Hermes (Telegram)", "tipo": "task", "obbligatorio": false, "abilitato": true,

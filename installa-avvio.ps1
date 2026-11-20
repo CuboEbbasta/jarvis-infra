@@ -1,12 +1,12 @@
-﻿# Jarvis - avvio automatico all'accesso a Windows (opt-in, per utente, senza amministratore).
+﻿# Brina - avvio automatico all'accesso a Windows (opt-in, per utente, senza amministratore).
 # Uso:  powershell -ExecutionPolicy Bypass -File infra\installa-avvio.ps1 -Stato
 #       ... -Prova [-ApriApp:$false]       mostra cosa verrebbe registrato, senza registrare nulla
 #       ... -Installa [-ApriApp:$false]    registra l'attivita' "Jarvis Avvio" (30 s dopo l'accesso, esegue avvia-tutto.ps1 senza finestre)
 #       ... -Rimuovi                       toglie l'attivita'
 #       ... -Ripristina                    toglie la nuova e ri-registra l'attivita' precedente dal backup XML (rollback)
 #   -SenzaFinestra  (equivale a -ApriApp:$false; con 'powershell -File' usa -SenzaFinestra)
-#   -ApriApp:$false  all'accesso partono solo i servizi, la finestra di Jarvis NON si apre (default: si apre)
-# Stesso schema delle altre attivita' Jarvis: wscript.exe //B lancia-nascosto.vbs <file .cmdline> (nessuna finestra, nemmeno il lampo).
+#   -ApriApp:$false  all'accesso partono solo i servizi, la finestra di Brina NON si apre (default: si apre)
+# Stesso schema delle altre attivita' Brina: wscript.exe //B lancia-nascosto.vbs <file .cmdline> (nessuna finestra, nemmeno il lampo).
 # NOTA: esiste gia' un'attivita' "Jarvis Avvio" (avvio ridotto: avvia-jarvis.ps1 via lancia-nascosto.vbs, ritardo 1 min): -Installa la SOSTITUISCE.
 #       Prima ne salva l'XML in infra\hidden\backup\jarvis-avvio-precedente.xml (verificato con [xml]; se non e' valido -Installa si ferma).
 #       Rollback: -Ripristina, cioe': Register-ScheduledTask -Xml (Get-Content infra\hidden\backup\jarvis-avvio-precedente.xml -Raw) -TaskName 'Jarvis Avvio' -Force
@@ -46,7 +46,7 @@ function Mostra-Definizione($d) {
     Write-Host "File comando:     $cmdFile"
     Write-Host "  contenuto:      $(Riga-Comando)"
     Write-Host "Impostazioni:     StartWhenAvailable, nessuno stop a batteria, limite 15 minuti, una sola istanza"
-    Write-Host ("Finestra Jarvis:  " + $(if ($ApriApp) { 'si apre all''accesso' } else { 'NON si apre (solo servizi)' }))
+    Write-Host ("Finestra Brina:  " + $(if ($ApriApp) { 'si apre all''accesso' } else { 'NON si apre (solo servizi)' }))
 }
 
 if ($Stato) {
@@ -94,7 +94,7 @@ if ($Installa) {
 if ($Rimuovi) {
     if (Get-ScheduledTask -TaskName $nomeTask -ErrorAction SilentlyContinue) {
         Unregister-ScheduledTask -TaskName $nomeTask -Confirm:$false
-        Write-Host "Attivita' '$nomeTask' rimossa: all'accesso non parte piu' nulla di Jarvis da qui."
+        Write-Host "Attivita' '$nomeTask' rimossa: all'accesso non parte piu' nulla di Brina da qui."
         Write-Host "Per rimettere il vecchio avvio ridotto:  powershell -ExecutionPolicy Bypass -File infra\installa-avvio.ps1 -Ripristina"
     } else { Write-Host "Nessuna attivita' '$nomeTask' da rimuovere." }
 }

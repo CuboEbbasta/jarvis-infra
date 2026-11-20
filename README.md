@@ -1,6 +1,6 @@
-# Jarvis infra
+# Brina infra
 
-Servizi Docker di Jarvis. Segreti in `.env` (mai in Git, mai nel vault).
+Servizi Docker di Brina. Segreti in `.env` (mai in Git, mai nel vault).
 
 | Servizio | URL | Note |
 |---|---|---|

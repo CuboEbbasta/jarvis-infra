@@ -1,4 +1,4 @@
-﻿# Avviso Telegram di Jarvis: manda UN messaggio breve al tuo account tramite il bot di Hermes.
+﻿# Avviso Telegram di Brina: manda UN messaggio breve al tuo account tramite il bot di Hermes.
 # Uso: . .\avvisa-telegram.ps1 ; Invia-Avviso "testo"     (oppure: .\avvisa-telegram.ps1 -Testo "prova")
 # Urgenti (solo allerte gravi): Invia-Vocale "testo" (vocale Isabella, container 'voce')
 #                               Chiama-Allarme "testo" (telefonata Telegram via CallMeBot, solo se infra\callmebot.txt esiste)

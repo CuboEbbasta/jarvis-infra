@@ -1,4 +1,4 @@
-# Jarvis - limita Ollama (porta 11434) a questo PC + Docker/WSL, chiudendolo alla rete di casa.
+# Brina - limita Ollama (porta 11434) a questo PC + Docker/WSL, chiudendolo alla rete di casa.
 # Eseguire in PowerShell COME AMMINISTRATORE:
 #   powershell -ExecutionPolicy Bypass -File .\firewall-ollama.ps1
 # Annullare:  Get-NetFirewallRule -DisplayName "Jarvis*" | Remove-NetFirewallRule ; poi riabilitare le regole Ollama disattivate

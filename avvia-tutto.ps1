@@ -1,7 +1,7 @@
-﻿# Jarvis - avvio orchestrato: porta su tutto cio' che serve e poi apre Jarvis Control Center.
+﻿# Brina - avvio orchestrato: porta su tutto cio' che serve e poi apre Brina Control Center.
 # Uso:  powershell -ExecutionPolicy Bypass -File infra\avvia-tutto.ps1 [-Controlla] [-SenzaApp] [-Silenzioso] [-AutoTest]
 #   -Controlla   solo verifica: non avvia nulla (ne' servizi ne' app)
-#   -SenzaApp    avvia i servizi ma non apre la finestra di Jarvis Control Center
+#   -SenzaApp    avvia i servizi ma non apre la finestra di Brina Control Center
 #   -Silenzioso  nessun output a console (usato dall'attivita' pianificata)
 #   -AutoTest    prova pura della validazione della config con voci malevole d'esempio: non avvia e non controlla nulla
 # Elenco e opzioni delle voci: infra\avvio-jarvis.json (nessun segreto). Ogni voce: se gia' OK la salta, altrimenti la avvia
@@ -322,7 +322,7 @@ function Attendi-Voce($it, [int]$secondi) {
     return $c
 }
 
-Say ("Jarvis - avvio {0}" -f $(if ($Controlla) { '(solo controllo)' } else { '' }))
+Say ("Brina - avvio {0}" -f $(if ($Controlla) { '(solo controllo)' } else { '' }))
 foreach ($it in $cfg.items) {
     $nome = [string]$it.nome; $obb = ($it.obbligatorio -eq $true)
     $e = Err-Voce $it
@@ -364,16 +364,18 @@ if (-not $Controlla -and (Falliti).Count -gt 0) {
     }
 }
 
-# --- finestra di Jarvis Control Center ---
+# --- finestra di Brina Control Center ---
 function Trova-App {
     $cand = New-Object System.Collections.ArrayList
     $reg = Get-ChildItem 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall' -ErrorAction SilentlyContinue |
-        ForEach-Object { Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue } | Where-Object { $_.DisplayName -eq 'Jarvis' } | Select-Object -First 1
+        ForEach-Object { Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue } | Where-Object { $_.DisplayName -in 'Brina', 'Jarvis' } | Select-Object -First 1
     if ($reg) {
         $dir = $reg.InstallLocation; if (-not $dir -and $reg.DisplayIcon) { $dir = Split-Path ($reg.DisplayIcon -replace '"', '') -Parent }
         if ($dir) { [void]$cand.Add(@{ dir = $dir; tipo = 'installata' }) }
     }
-    [void]$cand.Add(@{ dir = "$env:LOCALAPPDATA\Jarvis"; tipo = 'installata' }); [void]$cand.Add(@{ dir = "$env:LOCALAPPDATA\Programs\Jarvis"; tipo = 'installata' })
+    foreach ($n in 'Brina', 'Jarvis') {  # installatore nuovo (Brina) o precedente (Jarvis)
+        [void]$cand.Add(@{ dir = "$env:LOCALAPPDATA\$n"; tipo = 'installata' }); [void]$cand.Add(@{ dir = "$env:LOCALAPPDATA\Programs\$n"; tipo = 'installata' })
+    }
     foreach ($c in $cand) {
         if (-not (Test-Path $c.dir -PathType Container) -or -not (Sotto (Join-Path $c.dir 'x') @($env:LOCALAPPDATA, $env:ProgramFiles))) { continue }
         $x = Get-ChildItem $c.dir -Filter '*.exe' -ErrorAction SilentlyContinue | Where-Object { $_.Name -notmatch 'uninst' } | Select-Object -First 1
@@ -383,7 +385,7 @@ function Trova-App {
     if (Test-Path $b -PathType Leaf) { return @{ exe = $b; tipo = 'compilata (non installata)' } }
     return $null
 }
-$nomeApp = 'Jarvis Control Center (finestra)'
+$nomeApp = 'Brina Control Center (finestra)'
 if ($SenzaApp) { Riga $null $nomeApp 'disattivato' 'opzione -SenzaApp' $false }
 else {
     $app = Trova-App
@@ -403,9 +405,9 @@ $ko = @($righe | Where-Object { $_.Stato -eq 'NON OK' }).Count
 $stato = $(if ($obbFalliti.Count -gt 0) { 'failed' } elseif ($ko -gt 0) { 'partial' } else { 'success' })
 $ts = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
 $durata = [int]((Get-Date) - $t0).TotalSeconds
-$md = @('---', 'type: agent-status', 'agent: avvio', "state: $stato", 'task: "Avvio di Jarvis"', 'phase: "finito"',
+$md = @('---', 'type: agent-status', 'agent: avvio', "state: $stato", 'task: "Avvio di Brina"', 'phase: "finito"',
         "progress: `"$ko da guardare`"", 'model: nessuno', "updated: $ts", "ended: $ts", "result: `"$stato`"", '---',
-        ("# Avvio di Jarvis - " + (Get-Date -Format 'dd/MM HH:mm') + $(if ($Controlla) { ' (solo controllo)' } else { '' })), '',
+        ("# Avvio di Brina - " + (Get-Date -Format 'dd/MM HH:mm') + $(if ($Controlla) { ' (solo controllo)' } else { '' })), '',
         '| Voce | Stato | Dettaglio |', '|---|---|---|')
 foreach ($r in $righe) { $md += ('| {0} | {1} | {2} |' -f $r.Voce, $r.Stato, ($r.Dettaglio -replace '\|', '/')) }
 $md += @('', "Durata: $durata s. File generato da infra/avvia-tutto.ps1: non modificare. Config: infra/avvio-jarvis.json.")
@@ -422,7 +424,7 @@ Say ("Esito: $stato (durata $durata s)")
 if ($obbFalliti.Count -gt 0 -and -not $Controlla) {
     try {
         . (Join-Path $PSScriptRoot 'avvisa-telegram.ps1')
-        [void](Invia-Avviso ('Jarvis: avvio non riuscito -> ' + ($obbFalliti -join ', ') + '. Dettagli: Machine/Status/avvio.md'))
+        [void](Invia-Avviso ('Brina: avvio non riuscito -> ' + ($obbFalliti -join ', ') + '. Dettagli: Machine/Status/avvio.md'))
     } catch { }
 }
 if ($obbFalliti.Count -gt 0) { exit 1 }

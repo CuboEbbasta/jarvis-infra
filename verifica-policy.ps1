@@ -1,4 +1,4 @@
-﻿# Jarvis - verifica INDIPENDENTE delle regole di sicurezza (non la fa un agente: e' uno script fisso).
+﻿# Brina - verifica INDIPENDENTE delle regole di sicurezza (non la fa un agente: e' uno script fisso).
 # Controlla che i confini decisi non siano stati allentati per errore: segreti fuori da Git, porte solo locali,
 # vault montato in sola lettura dal server MCP, regole di divieto presenti, task senza finestre.
 # Non legge MAI il contenuto di .env o chiavi. Scrive Machine\Status\policy.md; con -Avvisa manda Telegram solo se qualcosa e' cambiato in peggio.
@@ -41,7 +41,7 @@ foreach ($s in @("$jarvis\.claude\settings.json", "$jarvis\DBVault\.claude\setti
   if (Test-Path $s) {
     $t = Get-Content $s -Raw -Encoding UTF8
     foreach ($req in @('.env', 'Human/Daily', 'Contesto/Email', 'Contesto/Calendario')) {
-      Controllo "$(if ($s -like '*DBVault*') { 'DBVault' } else { 'Jarvis' }): divieto di lettura su $req" ($t -match [regex]::Escape($req)) 'deny presente'
+      Controllo "$(if ($s -like '*DBVault*') { 'DBVault' } else { 'Brina' }): divieto di lettura su $req" ($t -match [regex]::Escape($req)) 'deny presente'
     }
   }
 }
@@ -52,7 +52,7 @@ Get-ScheduledTask -TaskPath '\' -ErrorAction SilentlyContinue | Where-Object Tas
   Controllo "Attivita' '$($_.TaskName)' attiva" ($_.State -ne 'Disabled') "$($_.State)$(if ($a.Execute -notmatch 'wscript') { ' (finestra visibile un istante)' })"
 }
 
-# 6) Codex: il profilo protetto di Jarvis esiste
+# 6) Codex: il profilo protetto di Brina esiste
 Controllo 'Codex: profilo ~\.codex-jarvis presente' (Test-Path "$env:USERPROFILE\.codex-jarvis") 'config separata dal profilo normale'
 
 $ora = (Get-Date).ToString('yyyy-MM-dd HH:mm')
@@ -65,5 +65,5 @@ Set-Content $out $md -Encoding UTF8
 Write-Host "Verifica policy: $ko problemi su $($righe.Count) controlli -> $out"
 if ($Avvisa -and $ko -gt 0 -and "$ko" -ne "$prima") {
   . (Join-Path $PSScriptRoot 'avvisa-telegram.ps1')
-  Invia-Avviso "Verifica sicurezza Jarvis: $ko controlli falliti. Dettagli: Machine/Status/policy.md" | Out-Null
+  Invia-Avviso "Verifica sicurezza Brina: $ko controlli falliti. Dettagli: Machine/Status/policy.md" | Out-Null
 }

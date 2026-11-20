@@ -1,4 +1,4 @@
-# Jarvis - crea una richiesta per gli agenti SENZA passare dal modello (usato dai comandi fissi di Hermes: /dashboard, /rassegna, ...).
+# Brina - crea una richiesta per gli agenti SENZA passare dal modello (usato dai comandi fissi di Hermes: /dashboard, /rassegna, ...).
 # Elenco chiuso: solo le azioni qui sotto. Nessun testo libero. 'study' resta fuori (occupa la GPU: si chiede prima).
 # Uso: powershell -NoProfile -ExecutionPolicy Bypass -File richiesta-rapida.ps1 dashboard
 param([Parameter(Mandatory, Position = 0)][string]$Azione)
