@@ -6,9 +6,25 @@
 # Prova una volta:        powershell -ExecutionPolicy Bypass -File .\esegui-richieste.ps1
 # Sempre attivo (accesso): powershell -ExecutionPolicy Bypass -File .\esegui-richieste.ps1 -Schedule
 # Rimuovere: Unregister-ScheduledTask -TaskName "Jarvis Richieste" -Confirm:$false
-param([switch]$Schedule, [switch]$Ciclo)
+# Dopo una modifica a questo file: powershell -ExecutionPolicy Bypass -File .\esegui-richieste.ps1 -Riavvia
+#   (Stop-ScheduledTask NON chiude il processo in ciclo: -Riavvia chiude le copie vecchie e riparte con il codice nuovo)
+param([switch]$Schedule, [switch]$Ciclo, [switch]$Riavvia)
 $ErrorActionPreference = 'Continue'
 try { [Console]::OutputEncoding = [Text.Encoding]::UTF8; $OutputEncoding = [Text.Encoding]::UTF8 } catch {}   # emoji leggibili negli esiti
+if ($Riavvia) {
+    Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" |
+        Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -match 'esegui-richieste\.ps1' -and $_.CommandLine -match '-Ciclo' } |
+        ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue; Write-Host "Chiuso l'esecutore $($_.ProcessId)." }
+    Start-Sleep -Seconds 1
+    Start-ScheduledTask -TaskName "Jarvis Richieste"
+    Write-Host "Esecutore riavviato con il codice attuale."
+    return
+}
+if ($Ciclo) {
+    # una sola copia in ciclo: due esecutori prenderebbero le stesse richieste (uno magari con codice vecchio)
+    $script:unico = New-Object System.Threading.Mutex($false, 'Local\BrinaEseguiRichieste')
+    if (-not $script:unico.WaitOne(0)) { Write-Host 'Esecutore gia attivo: esco.'; return }
+}
 if ($Schedule) {
     $act = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$PSCommandPath`" -Ciclo"
     $trg = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
